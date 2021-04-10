@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     //Public Variables
     [SerializeField] float jumpForce = 50f;
     [SerializeField] float moveSpeed = 30f;
+    [SerializeField] int healthPoint = 4;
     public GameObject Kunai;
     public GameObject KunaiSpawnLocation;
 
@@ -14,6 +15,8 @@ public class PlayerController : MonoBehaviour
     bool isRunning;
     bool isJumping;
     bool isFacingRight = true;
+    bool isDead;
+    bool isTakingDamage;
     bool isThrowing;
     
     bool isAttacking = false;
@@ -25,49 +28,35 @@ public class PlayerController : MonoBehaviour
     
     Rigidbody2D playerRb;
     Animator playerAnim;
-    CircleCollider2D playerCC;
+    SpriteRenderer playerSR;
+    Color playerOriginalColor;
 
     // Start is called before the first frame update
     void Awake()
     {
         playerRb = GetComponent<Rigidbody2D>();
         playerAnim = GetComponent<Animator>();
-        playerCC = GetComponent<CircleCollider2D>();
+        playerSR = GetComponent<SpriteRenderer>();
+        playerOriginalColor = playerSR.color;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Move Player horizontally
-        horizontalValue = Input.GetAxis("Horizontal");
-        if (horizontalValue != 0f && !isAttacking && !isThrowing)
+        if(healthPoint == 0)
         {
-            isRunning = true;
-            playerAnim.SetBool("Running", isRunning);
-        }
-        else
-        {
-            isRunning = false;
-            playerAnim.SetBool("Running", isRunning);
+            isDead = true;
         }
 
-        //player vertical value.
-        verticalValue = playerRb.velocity.y;
-
-        //Do Jump
-        Jump();
-
-        //Move the Player
-        if(isRunning)
+        if(!isDead)
         {
-            playerRb.velocity = new Vector2(horizontalValue * moveSpeed, verticalValue);
+            PlayerMainControls();
         }
-
-        //Initiate Attack
-        Attack();
-
-        //Start Throwing
-        Throwing();
+        else if (isDead)
+        {
+            playerAnim.SetTrigger("Dead");
+        }
+        
     }
 
     private void LateUpdate()
@@ -89,6 +78,40 @@ public class PlayerController : MonoBehaviour
         }
 
         transform.localScale = localScale;
+    }
+
+    void PlayerMainControls()
+    {
+        //Move Player horizontally
+        horizontalValue = Input.GetAxis("Horizontal");
+        if (horizontalValue != 0f && !isAttacking && !isThrowing)
+        {
+            isRunning = true;
+            playerAnim.SetBool("Running", isRunning);
+        }
+        else
+        {
+            isRunning = false;
+            playerAnim.SetBool("Running", isRunning);
+        }
+
+        //player vertical value.
+        verticalValue = playerRb.velocity.y;
+
+        //Do Jump
+        Jump();
+
+        //Move the Player
+        if (isRunning)
+        {
+            playerRb.velocity = new Vector2(horizontalValue * moveSpeed, verticalValue);
+        }
+
+        //Initiate Attack
+        Attack();
+
+        //Start Throwing
+        Throwing();
     }
 
     //Do Jump
@@ -133,6 +156,32 @@ public class PlayerController : MonoBehaviour
         {
             isThrowing = false;
             playerAnim.SetBool("Throwing", isThrowing);
+        }
+    }
+
+    public void AppplyDamage()
+    {
+        if (!isTakingDamage && !isDead)
+        {
+            isTakingDamage = true;
+            playerSR.color = Color.red;
+            healthPoint--;
+            StartCoroutine(ResetTakingDamage());
+        }
+    }
+
+    IEnumerator ResetTakingDamage()
+    {
+        yield return new WaitForSeconds(0.5f);
+        isTakingDamage = false;
+        playerSR.color = playerOriginalColor;
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (isAttacking && collision.gameObject.CompareTag("Enemy"))
+        {
+            collision.GetComponent<MyEnemy>().AppplyDamage();
         }
     }
 

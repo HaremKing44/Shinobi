@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8e861fb7ae3970448700bec5cefc2cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 400
+  jumpForce: 500
   moveSpeed: 5
   Kunai: {fileID: 6762170496331937396, guid: 14c044648a23f8b4f8ae348bbb0f5108, type: 3}
   KunaiSpawnLocation: {fileID: 3892541051870312181}
@@ -171,7 +171,7 @@ Rigidbody2D:
   m_GravityScale: 2
   m_Material: {fileID: 0}
   m_Interpolate: 0
-  m_SleepingMode: 1
+  m_SleepingMode: 0
   m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!58 &3892541052578305721
@@ -203,7 +203,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.30572832}
+  m_Offset: {x: 0.4003737, y: 0.30572832}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -214,5 +214,5 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.16, y: 1.5400517}
+  m_Size: {x: 2, y: 1.5400517}
   m_EdgeRadius: 0
