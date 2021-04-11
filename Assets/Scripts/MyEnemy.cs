@@ -8,14 +8,18 @@ public class MyEnemy : MonoBehaviour
     [SerializeField] GameObject[] waypoints = new GameObject[2];
     [Range(0f, 50f)] [SerializeField] float enemyMoveSpeed = 10f;
     [Range(1, 3)] [SerializeField] int healthPoint = 2;
-    
+    public GameObject Kunai;
+    public GameObject KunaiSpawnLocation;
+    public bool canMeleeAttack;
+    public bool canThrowKunai;
 
     bool isRunning;
     bool isMovingRight = true;
     bool isDead;
 
-    public bool isEngaged;
+    [HideInInspector]public bool isEngaged;
     bool isAttacking;
+    bool isThrowing;
     bool isTakingDamage;
 
     float AttackTime;
@@ -25,7 +29,7 @@ public class MyEnemy : MonoBehaviour
     Animator EnemyAnim;
     SpriteRenderer enemySR;
     Color enemyOriginalColor;
-    Rigidbody2D enemyRb;
+    Rigidbody2D enemyRb; //TODO damage Force
 
     // Start is called before the first frame update
     void Awake()
@@ -67,7 +71,7 @@ public class MyEnemy : MonoBehaviour
         Flip();
         EnemySight();
 
-        if (!isEngaged)
+        if (!isEngaged && canMeleeAttack)
         {
             if (isMovingRight)
             {
@@ -83,7 +87,7 @@ public class MyEnemy : MonoBehaviour
             }
         }
 
-        if (isEngaged)
+        if (isEngaged && canMeleeAttack)
         {
             if(Mathf.Abs(playerContoller.transform.position.x - transform.position.x) > 1.5f)
             {
@@ -102,13 +106,22 @@ public class MyEnemy : MonoBehaviour
                 }
             }
         }
+
+        if(isEngaged && canThrowKunai)
+        {
+            if (!isThrowing && ((Time.time) >= AttackTime))
+            {
+                AttackTime = Time.time + AttackTimeInterval;
+                ThrowKunai();
+            }
+        }
     }
 
     void Flip()
     {
         Vector3 localScale = transform.localScale;
 
-        if (!isEngaged)
+        if (!isEngaged && canMeleeAttack)
         {
             if (isMovingRight && (Mathf.Abs(transform.position.x - waypoints[0].transform.position.x) <= 0.05f))
             {
@@ -123,25 +136,11 @@ public class MyEnemy : MonoBehaviour
                 transform.localScale = localScale;
             }
         }
-
-        /*if (isEngaged)
-        {
-            if(Mathf.Abs(transform.position.x - playerContoller.transform.position.x) <= 2f)
-            { 
-                isAttacking = true;
-            }
-            else
-            {
-                isThrowing = true;
-            }
-        }*/
-
-        //transform.localScale = localScale;
     }
 
     void EnemySight()
     {
-        if (Mathf.Abs(frontSight.transform.position.x - playerContoller.transform.position.x) <= 0.5f)
+        if ((Mathf.Abs(frontSight.transform.position.x - playerContoller.transform.position.x) <= 0.5f) && (Mathf.Abs(transform.position.y - playerContoller.transform.position.y)) <= 0.1f)
         {
             isEngaged = true;
         }
@@ -165,6 +164,21 @@ public class MyEnemy : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         isAttacking = false;
         EnemyAnim.SetBool("Attacking", isAttacking);
+    }
+
+    void ThrowKunai()
+    {
+        isThrowing = true;
+        EnemyAnim.SetBool("Throwing", isThrowing);
+        Instantiate(Kunai, KunaiSpawnLocation.transform.position, KunaiSpawnLocation.transform.rotation);
+        StartCoroutine(ResetThrow());
+    }
+
+    IEnumerator ResetThrow()
+    {
+        yield return new WaitForSeconds(0.5f);
+        isThrowing = false;
+        EnemyAnim.SetBool("Throwing", isThrowing);
     }
 
     public void AppplyDamage()

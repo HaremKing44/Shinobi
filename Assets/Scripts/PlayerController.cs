@@ -7,11 +7,15 @@ public class PlayerController : MonoBehaviour
     //Public Variables
     [SerializeField] float jumpForce = 50f;
     [SerializeField] float moveSpeed = 30f;
-    [SerializeField] int healthPoint = 4;
+    public int healthPoint = 4;
     public GameObject Kunai;
     public GameObject KunaiSpawnLocation;
+    
+    public int KunaiHeld = 4;
+    public bool hasDoubleJumpAbility;
 
     //Private Variables
+    bool CanDoubleJump;
     bool isRunning;
     bool isJumping;
     bool isFacingRight = true;
@@ -25,11 +29,12 @@ public class PlayerController : MonoBehaviour
     
     float horizontalValue;
     float verticalValue;
-    
+
     Rigidbody2D playerRb;
     Animator playerAnim;
     SpriteRenderer playerSR;
     Color playerOriginalColor;
+    GameManager gameManager;
 
     // Start is called before the first frame update
     void Awake()
@@ -38,6 +43,7 @@ public class PlayerController : MonoBehaviour
         playerAnim = GetComponent<Animator>();
         playerSR = GetComponent<SpriteRenderer>();
         playerOriginalColor = playerSR.color;
+        gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
@@ -122,13 +128,19 @@ public class PlayerController : MonoBehaviour
             playerRb.AddForce(new Vector2(0, jumpForce));
             isJumping = true;
             playerAnim.SetBool("Jumping", isJumping);
+
+            if(CanDoubleJump)
+            {
+                isJumping = false;
+                CanDoubleJump = false;
+            }
         }
     }
 
     //Initiate Attack
     void Attack()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl) && !isAttacking)
+        if ((Input.GetKeyDown(KeyCode.LeftControl) || Input.GetMouseButtonDown(0)) && !isAttacking)
         {
             isAttacking = true;
             playerAnim.SetBool("Attacking", isAttacking);
@@ -144,13 +156,15 @@ public class PlayerController : MonoBehaviour
     //Start Throwing
     void Throwing()
     {
-        if (Input.GetKeyDown(KeyCode.F) && !isThrowing)
+        if ((Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(1)) && !isThrowing && KunaiHeld != 0)
         {
             isThrowing = true;
             playerAnim.SetBool("Throwing", isThrowing);
             AttackTime = Time.time + AttackTimeInterval;
 
             Instantiate(Kunai, KunaiSpawnLocation.transform.position, KunaiSpawnLocation.transform.rotation);
+            KunaiHeld--;
+            gameManager.UpdateKunaiGUI();
         }
         else if (isThrowing && (Time.time > AttackTime))
         {
@@ -166,6 +180,7 @@ public class PlayerController : MonoBehaviour
             isTakingDamage = true;
             playerSR.color = Color.red;
             healthPoint--;
+            gameManager.UpdateHealthGUI();
             StartCoroutine(ResetTakingDamage());
         }
     }
@@ -191,6 +206,10 @@ public class PlayerController : MonoBehaviour
         if(collision.gameObject.CompareTag("Ground"))
         {
             isJumping = false;
+            if(hasDoubleJumpAbility)
+            {
+                CanDoubleJump = true;
+            }
             playerAnim.SetBool("Jumping", isJumping);
         }
     }
