@@ -29,7 +29,7 @@ public class MyEnemy : MonoBehaviour
     Animator EnemyAnim;
     SpriteRenderer enemySR;
     Color enemyOriginalColor;
-    Rigidbody2D enemyRb; //TODO damage Force
+    GameManager gameManager;
 
     // Start is called before the first frame update
     void Awake()
@@ -38,13 +38,16 @@ public class MyEnemy : MonoBehaviour
         EnemyAnim = GetComponent<Animator>();
         enemySR = GetComponent<SpriteRenderer>();
         enemyOriginalColor = enemySR.color;
-        enemyRb = GetComponent<Rigidbody2D>();
+        gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(healthPoint == 0)
+        if (!gameManager.isInGame)
+            return;
+
+        if (healthPoint == 0)
         {
             isDead = true;
         }

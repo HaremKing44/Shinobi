@@ -49,9 +49,13 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!gameManager.isInGame)
+            return;
+
         if(healthPoint == 0)
         {
             isDead = true;
+            gameManager.GameOver();
         }
 
         if(!isDead)
@@ -67,6 +71,9 @@ public class PlayerController : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (!gameManager.isInGame)
+            return;
+
         Vector3 localScale = transform.localScale;
 
         if(horizontalValue > 0f)
@@ -140,7 +147,7 @@ public class PlayerController : MonoBehaviour
     //Initiate Attack
     void Attack()
     {
-        if ((Input.GetKeyDown(KeyCode.LeftControl) || Input.GetMouseButtonDown(0)) && !isAttacking)
+        if (Input.GetMouseButtonDown(0) && !isAttacking)
         {
             isAttacking = true;
             playerAnim.SetBool("Attacking", isAttacking);
@@ -156,7 +163,7 @@ public class PlayerController : MonoBehaviour
     //Start Throwing
     void Throwing()
     {
-        if ((Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(1)) && !isThrowing && KunaiHeld != 0)
+        if (Input.GetMouseButtonDown(1) && !isThrowing && KunaiHeld != 0)
         {
             isThrowing = true;
             playerAnim.SetBool("Throwing", isThrowing);

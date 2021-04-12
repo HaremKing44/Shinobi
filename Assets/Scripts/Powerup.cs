@@ -24,7 +24,7 @@ public class Powerup : MonoBehaviour
     {
         if (collision.CompareTag("Player") && isUsedForKunai)
         {
-            playerRef.GetComponent<PlayerController>().KunaiHeld += 5;
+            playerRef.GetComponent<PlayerController>().KunaiHeld += 3;
             GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().KunaiPick();
             Destroy(gameObject);
         }
